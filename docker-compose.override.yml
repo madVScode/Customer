@@ -1,0 +1,7 @@
+services:
+  laravel.test:
+    build:
+      context: ./docker/8.2
+      dockerfile: Dockerfile
+      args:
+        NODE_VERSION: 20

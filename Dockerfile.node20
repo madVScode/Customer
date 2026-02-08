@@ -1,0 +1,14 @@
+# =====================================
+# Dockerfile.node20
+# Upgrade Node untuk Laravel Sail
+# =====================================
+
+# Base image: gunakan PHP 8.2 + Composer
+FROM laravelsail/php82-composer:latest
+
+# -------------------------------------
+# Prompt/Command untuk install Node 20
+# -------------------------------------
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+    && apt-get install -y nodejs \
+    && npm install -g npm@latest
