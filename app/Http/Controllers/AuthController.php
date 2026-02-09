@@ -7,6 +7,10 @@ use App\Models\ActivityLog;
 use App\Models\Notification;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\DB;
 
 class AuthController extends Controller
 {
@@ -14,8 +18,6 @@ class AuthController extends Controller
      * =========================================================
      * Show Login Page
      * =========================================================
-     * - Jika user dah login → redirect ke dashboard
-     * - Jika belum → paparkan login page
      */
     public function showLogin()
     {
@@ -30,11 +32,6 @@ class AuthController extends Controller
      * =========================================================
      * Process Login
      * =========================================================
-     * - Validate input
-     * - Attempt login
-     * - Update online status
-     * - Log activity
-     * - Notify other users
      */
     public function login(Request $request)
     {
@@ -103,10 +100,6 @@ class AuthController extends Controller
      * =========================================================
      * Logout
      * =========================================================
-     * - Update online status
-     * - Log logout activity
-     * - Notify other users
-     * - Destroy session
      */
     public function logout(Request $request)
     {
@@ -144,11 +137,213 @@ class AuthController extends Controller
 
     /**
      * =========================================================
+     * 🔥 FORGOT PASSWORD - Send Reset Link
+     * =========================================================
+     */
+    public function forgotPassword(Request $request)
+    {
+        // Validate email
+        $request->validate([
+            'email' => 'required|email|exists:users,email',
+        ], [
+            'email.exists' => 'We couldn\'t find an account with that email address.',
+        ]);
+
+        // Check if user exists
+        $user = User::where('email', $request->email)->first();
+
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'We couldn\'t find an account with that email address.',
+            ], 404);
+        }
+
+        // Delete old tokens for this email
+        DB::table('password_reset_tokens')
+            ->where('email', $request->email)
+            ->delete();
+
+        // Generate reset token
+        $token = Str::random(64);
+
+        // Store token in database
+        DB::table('password_reset_tokens')->insert([
+            'email' => $request->email,
+            'token' => Hash::make($token),
+            'created_at' => now(),
+        ]);
+
+        // Create reset URL
+        $resetUrl = url('/reset-password/' . $token . '?email=' . urlencode($request->email));
+
+        // Log activity
+        ActivityLog::create([
+            'user_id' => $user->id,
+            'action' => 'password_reset_requested',
+            'model' => 'User',
+            'model_id' => $user->id,
+            'description' => 'Password reset requested for ' . $user->email,
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+        ]);
+
+        // TODO: Send email with reset link
+        // In production, you would send an email here:
+        // Mail::to($request->email)->send(new ResetPasswordMail($resetUrl));
+
+        // For now, return success with the URL (in production, don't return the URL!)
+        return response()->json([
+            'success' => true,
+            'message' => 'Password reset link has been sent to your email address.',
+            'reset_url' => $resetUrl, // ⚠️ REMOVE THIS IN PRODUCTION!
+        ]);
+    }
+
+    /**
+     * =========================================================
+     * 🔥 SHOW RESET PASSWORD FORM
+     * =========================================================
+     */
+    public function showResetForm(Request $request, $token)
+    {
+        $email = $request->query('email');
+
+        // Validate that we have both token and email
+        if (!$token || !$email) {
+            return redirect()->route('login')
+                ->with('error', 'Invalid password reset link.');
+        }
+
+        // Check if token exists and is valid (not expired)
+        $resetRecord = DB::table('password_reset_tokens')
+            ->where('email', $email)
+            ->first();
+
+        if (!$resetRecord) {
+            return redirect()->route('login')
+                ->with('error', 'Invalid or expired password reset link.');
+        }
+
+        // Check if token is expired (60 minutes)
+        $tokenAge = now()->diffInMinutes($resetRecord->created_at);
+        if ($tokenAge > 60) {
+            // Delete expired token
+            DB::table('password_reset_tokens')
+                ->where('email', $email)
+                ->delete();
+
+            return redirect()->route('login')
+                ->with('error', 'Password reset link has expired. Please request a new one.');
+        }
+
+        // Show reset password form
+        return view('auth.reset-password', [
+            'token' => $token,
+            'email' => $email,
+        ]);
+    }
+
+    /**
+     * =========================================================
+     * 🔥 PROCESS RESET PASSWORD
+     * =========================================================
+     */
+    public function resetPassword(Request $request)
+    {
+        // Validate input
+        $request->validate([
+            'token' => 'required',
+            'email' => 'required|email|exists:users,email',
+            'password' => 'required|min:6|confirmed',
+        ], [
+            'password.confirmed' => 'Passwords do not match.',
+        ]);
+
+        // Find reset token record
+        $resetRecord = DB::table('password_reset_tokens')
+            ->where('email', $request->email)
+            ->first();
+
+        if (!$resetRecord) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid or expired password reset link.',
+            ], 400);
+        }
+
+        // Check if token is expired (60 minutes)
+        $tokenAge = now()->diffInMinutes($resetRecord->created_at);
+        if ($tokenAge > 60) {
+            // Delete expired token
+            DB::table('password_reset_tokens')
+                ->where('email', $request->email)
+                ->delete();
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Password reset link has expired. Please request a new one.',
+            ], 400);
+        }
+
+        // Verify token matches (compare with hashed token)
+        if (!Hash::check($request->token, $resetRecord->token)) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Invalid password reset token.',
+            ], 400);
+        }
+
+        // Find user
+        $user = User::where('email', $request->email)->first();
+
+        if (!$user) {
+            return response()->json([
+                'success' => false,
+                'message' => 'User not found.',
+            ], 404);
+        }
+
+        // Update password
+        $user->password = Hash::make($request->password);
+        $user->save();
+
+        // Delete used token
+        DB::table('password_reset_tokens')
+            ->where('email', $request->email)
+            ->delete();
+
+        // Log activity
+        ActivityLog::create([
+            'user_id' => $user->id,
+            'action' => 'password_reset_completed',
+            'model' => 'User',
+            'model_id' => $user->id,
+            'description' => 'Password reset completed for ' . $user->email,
+            'ip_address' => $request->ip(),
+            'user_agent' => $request->userAgent(),
+        ]);
+
+        // Notify user (optional)
+        Notification::create([
+            'user_id' => $user->id,
+            'triggered_by' => $user->id,
+            'type' => 'password_changed',
+            'title' => 'Password Changed',
+            'message' => 'Your password has been successfully changed.',
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Password has been reset successfully! You can now login with your new password.',
+            'redirect' => route('login'),
+        ]);
+    }
+
+    /**
+     * =========================================================
      * Heartbeat (Keep user online)
      * =========================================================
-     * - Dipanggil secara berkala (AJAX)
-     * - Update last_seen
-     * - Return list of online users
      */
     public function heartbeat(Request $request)
     {
@@ -172,8 +367,6 @@ class AuthController extends Controller
      * =========================================================
      * Get Online Users
      * =========================================================
-     * - Exclude current user
-     * - Return formatted user list
      */
     public function getOnlineUsers()
     {
@@ -198,7 +391,6 @@ class AuthController extends Controller
      * =========================================================
      * Notify Other Users
      * =========================================================
-     * - Create notification for all users except current
      */
     private function notifyOtherAdmins(User $currentUser, string $type, string $message): void
     {
@@ -219,7 +411,6 @@ class AuthController extends Controller
      * =========================================================
      * Get Current Logged In User Info
      * =========================================================
-     * - Used by frontend (profile, navbar, etc)
      */
     public function me()
     {

@@ -20,6 +20,15 @@ Route::middleware('guest')->group(function () {
     Route::post('/login', [AuthController::class, 'login'])->name('login.post');
 });
 
+// 🔥 FORGOT PASSWORD ROUTES
+Route::post('/forgot-password', [AuthController::class, 'forgotPassword'])
+    ->name('password.forgot');
+    
+Route::get('/reset-password/{token}', [AuthController::class, 'showResetForm'])
+    ->name('password.reset');
+    
+Route::post('/reset-password', [AuthController::class, 'resetPassword'])
+    ->name('password.update');
 // ================= AUTHENTICATED ROUTES =================
 Route::middleware('auth')->group(function () {
 
