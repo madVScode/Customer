@@ -1,0 +1,19 @@
+[90m= [39m[
+    "[34mid[39m" => [35m2[39m,
+    "[34munique_id[39m" => "[32m6fbd4fd5-9cce-4f03-a9fb-6fa016100702[39m",
+    "[34mname[39m" => "[32mOwner Business[39m",
+    "[34memail[39m" => "[32mowner@system.local[39m",
+    "[34mgoogle_id[39m" => [36mnull[39m,
+    "[34mfacebook_id[39m" => [36mnull[39m,
+    "[34memail_verified_at[39m" => [36mnull[39m,
+    "[34mrole[39m" => "[32mowner_business[39m",
+    "[34mcompany_id[39m" => [36mnull[39m,
+    "[34mphone[39m" => [36mnull[39m,
+    "[34mis_online[39m" => [36mtrue[39m,
+    "[34mlast_seen_at[39m" => "[32m2026-03-26T07:40:43.000000Z[39m",
+    "[34mlast_seen[39m" => [36mnull[39m,
+    "[34mavatar[39m" => [36mnull[39m,
+    "[34mcreated_at[39m" => "[32m2026-02-26T16:38:25.000000Z[39m",
+    "[34mupdated_at[39m" => "[32m2026-03-26T07:40:43.000000Z[39m",
+  ]
+

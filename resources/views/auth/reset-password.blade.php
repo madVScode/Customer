@@ -2,12 +2,16 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="theme-color" content="#2D8CFF">
     <title>Reset Password - Customer Pro</title>
     
     <!-- jQuery -->
     <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     
     <style>
         * {
@@ -17,261 +21,216 @@
         }
 
         :root {
-            --primary: #667eea;
-            --primary-dark: #5a67d8;
-            --secondary: #764ba2;
-            --success: #48bb78;
-            --error: #f56565;
-            --text-dark: #2d3748;
-            --text-light: #718096;
-            --border: #e2e8f0;
-            --bg-light: #f7fafc;
+            --zoom-blue: #2D8CFF;
+            --zoom-blue-hover: #0B5CFF;
+            --zoom-dark: #1C1C1E;
+            --zoom-gray: #747487;
+            --zoom-light-gray: #F5F5F7;
+            --zoom-border: #E5E5EA;
+            --success: #34C759;
+            --error: #FF3B30;
+        }
+
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .reset-wrapper {
+            width: 100%;
+            height: 100%;
             display: flex;
             align-items: center;
             justify-content: center;
             padding: 20px;
-            position: relative;
-            overflow: hidden;
+            overflow-y: auto;
+            animation: fadeIn 0.6s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
-        /* ================= ANIMATED BACKGROUND ================= */
-        .bg-circle {
-            position: absolute;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.1);
-            animation: float 20s infinite ease-in-out;
-            backdrop-filter: blur(2px);
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
 
-        .bg-circle:nth-child(1) {
-            width: 400px;
-            height: 400px;
-            top: -150px;
-            left: -150px;
-            animation-delay: 0s;
-        }
-
-        .bg-circle:nth-child(2) {
-            width: 300px;
-            height: 300px;
-            bottom: -100px;
-            right: -100px;
-            animation-delay: 4s;
-        }
-
-        .bg-circle:nth-child(3) {
-            width: 200px;
-            height: 200px;
-            top: 50%;
-            right: 10%;
-            animation-delay: 2s;
-        }
-
-        @keyframes float {
-            0%, 100% {
-                transform: translateY(0) rotate(0deg);
-            }
-            50% {
-                transform: translateY(-30px) rotate(180deg);
-            }
-        }
-
-        /* ================= RESET CONTAINER ================= */
-        .reset-container {
+        .reset-card {
             background: white;
-            border-radius: 24px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
             width: 100%;
-            max-width: 500px;
-            position: relative;
-            z-index: 10;
-            animation: slideUp 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-            overflow: hidden;
+            max-width: 480px;
+            animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         @keyframes slideUp {
             from {
                 opacity: 0;
-                transform: translateY(50px) scale(0.9);
+                transform: translateY(30px);
             }
             to {
                 opacity: 1;
-                transform: translateY(0) scale(1);
-            }
-        }
-
-        /* ================= HEADER ================= */
-        .reset-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            padding: 50px 40px 40px;
-            text-align: center;
-            color: white;
-            position: relative;
-        }
-
-        .reset-header::before {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            height: 40px;
-            background: white;
-            border-radius: 50% 50% 0 0;
-        }
-
-        .reset-logo {
-            font-size: 4rem;
-            margin-bottom: 15px;
-            animation: bounce 2s infinite;
-            filter: drop-shadow(0 4px 8px rgba(0,0,0,0.2));
-        }
-
-        @keyframes bounce {
-            0%, 100% {
                 transform: translateY(0);
             }
-            50% {
-                transform: translateY(-15px);
-            }
+        }
+
+        .reset-header {
+            text-align: center;
+            padding: 48px 40px 32px;
+        }
+
+        .reset-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 24px;
+            background: linear-gradient(135deg, var(--zoom-blue) 0%, #0B5CFF 100%);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            box-shadow: 0 8px 24px rgba(45, 140, 255, 0.3);
         }
 
         .reset-title {
-            font-size: 2rem;
-            font-weight: 800;
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--zoom-dark);
             margin-bottom: 8px;
-            letter-spacing: -0.5px;
-            position: relative;
-            z-index: 1;
         }
 
         .reset-subtitle {
-            font-size: 1rem;
-            opacity: 0.95;
+            font-size: 15px;
+            color: var(--zoom-gray);
             font-weight: 500;
-            position: relative;
-            z-index: 1;
         }
 
-        /* ================= BODY ================= */
         .reset-body {
-            padding: 50px 40px 40px;
+            padding: 0 40px 40px;
         }
 
-        /* ================= ALERTS ================= */
         .alert {
-            padding: 16px 20px;
-            border-radius: 14px;
-            margin-bottom: 25px;
+            padding: 14px 16px;
+            border-radius: 12px;
+            margin-bottom: 24px;
             display: none;
-            animation: slideDown 0.3s ease;
+            font-size: 14px;
             font-weight: 500;
-            font-size: 0.95rem;
+            animation: slideDown 0.3s ease;
         }
 
         @keyframes slideDown {
-            from {
-                opacity: 0;
-                transform: translateY(-15px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         .alert-error {
-            background: linear-gradient(135deg, #fed7d7 0%, #feb2b2 100%);
-            color: #742a2a;
-            border: 2px solid #fc8181;
+            background: #FFE5E5;
+            color: #D32F2F;
+            border: 1px solid #FFCDD2;
         }
 
         .alert-success {
-            background: linear-gradient(135deg, #c6f6d5 0%, #9ae6b4 100%);
-            color: #22543d;
-            border: 2px solid #68d391;
+            background: #E8F5E9;
+            color: #388E3C;
+            border: 1px solid #C8E6C9;
         }
 
-        /* ================= FORM ================= */
+        .info-box {
+            background: #E3F2FD;
+            border: 1px solid #BBDEFB;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 24px;
+            color: #1976D2;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .info-box strong {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+
+        .info-box ul {
+            margin: 0;
+            padding-left: 18px;
+        }
+
+        .info-box li {
+            margin: 4px 0;
+        }
+
         .form-group {
-            margin-bottom: 28px;
+            margin-bottom: 20px;
         }
 
         .form-label {
             display: block;
-            margin-bottom: 10px;
-            font-weight: 700;
-            color: var(--text-dark);
-            font-size: 0.95rem;
-            letter-spacing: -0.2px;
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--zoom-dark);
+            margin-bottom: 8px;
         }
 
         .input-wrapper {
             position: relative;
         }
 
-        .input-icon {
-            position: absolute;
-            left: 20px;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 1.3rem;
-            color: #a0aec0;
-            transition: all 0.3s;
-            z-index: 1;
-        }
-
         .form-input {
             width: 100%;
-            padding: 16px 20px 16px 58px;
-            border: 2px solid var(--border);
-            border-radius: 14px;
-            font-size: 1rem;
-            transition: all 0.3s;
-            background: var(--bg-light);
+            padding: 14px 16px;
+            border: 2px solid var(--zoom-border);
+            border-radius: 10px;
+            font-size: 15px;
             font-weight: 500;
+            color: var(--zoom-dark);
+            transition: all 0.2s;
+            background: var(--zoom-light-gray);
+            font-family: 'Inter', sans-serif;
         }
 
         .form-input:focus {
             outline: none;
-            border-color: var(--primary);
+            border-color: var(--zoom-blue);
             background: white;
-            box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+            box-shadow: 0 0 0 3px rgba(45, 140, 255, 0.1);
         }
 
-        .form-input:focus + .input-icon {
-            color: var(--primary);
-            transform: translateY(-50%) scale(1.1);
+        .form-input:read-only {
+            background: #F0F0F0;
+            cursor: not-allowed;
         }
 
-        /* ================= PASSWORD TOGGLE ================= */
         .password-toggle {
             position: absolute;
-            right: 20px;
+            right: 14px;
             top: 50%;
             transform: translateY(-50%);
             background: none;
             border: none;
             cursor: pointer;
-            font-size: 1.3rem;
-            padding: 8px;
-            border-radius: 8px;
-            transition: all 0.3s;
-            z-index: 2;
+            font-size: 20px;
+            padding: 6px;
+            border-radius: 6px;
+            transition: background 0.2s;
         }
 
         .password-toggle:hover {
-            background: var(--bg-light);
-            transform: translateY(-50%) scale(1.1);
+            background: var(--zoom-light-gray);
         }
 
-        /* ================= PASSWORD STRENGTH ================= */
         .password-strength {
             margin-top: 12px;
             display: none;
@@ -279,7 +238,7 @@
 
         .strength-bar {
             height: 6px;
-            background: #e2e8f0;
+            background: var(--zoom-border);
             border-radius: 3px;
             overflow: hidden;
             margin-bottom: 8px;
@@ -293,103 +252,96 @@
         }
 
         .strength-text {
-            font-size: 0.85rem;
+            font-size: 13px;
             font-weight: 600;
             text-align: center;
         }
 
         .strength-weak .strength-fill {
             width: 33%;
-            background: #f56565;
+            background: var(--error);
         }
 
         .strength-weak .strength-text {
-            color: #f56565;
+            color: var(--error);
         }
 
         .strength-medium .strength-fill {
             width: 66%;
-            background: #ed8936;
+            background: #FF9500;
         }
 
         .strength-medium .strength-text {
-            color: #ed8936;
+            color: #FF9500;
         }
 
         .strength-strong .strength-fill {
             width: 100%;
-            background: #48bb78;
+            background: var(--success);
         }
 
         .strength-strong .strength-text {
-            color: #48bb78;
+            color: var(--success);
         }
 
-        /* ================= BUTTONS ================= */
         .btn-reset {
             width: 100%;
-            padding: 18px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 16px;
+            background: var(--zoom-blue);
             color: white;
             border: none;
-            border-radius: 14px;
-            font-size: 1.15rem;
-            font-weight: 800;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 700;
             cursor: pointer;
-            transition: all 0.3s;
-            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
-            letter-spacing: 0.5px;
-            margin-top: 10px;
+            transition: all 0.2s;
+            font-family: 'Inter', sans-serif;
+            box-shadow: 0 4px 12px rgba(45, 140, 255, 0.3);
+            margin-top: 8px;
         }
 
         .btn-reset:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.6);
-        }
-
-        .btn-reset:active {
+            background: var(--zoom-blue-hover);
             transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(45, 140, 255, 0.4);
         }
 
         .btn-reset:disabled {
-            opacity: 0.7;
+            opacity: 0.6;
             cursor: not-allowed;
             transform: none;
         }
 
         .btn-back {
             width: 100%;
-            padding: 16px;
-            background: var(--bg-light);
-            color: var(--text-dark);
-            border: 2px solid var(--border);
-            border-radius: 14px;
-            font-size: 1rem;
-            font-weight: 700;
+            padding: 14px;
+            background: var(--zoom-light-gray);
+            color: var(--zoom-dark);
+            border: none;
+            border-radius: 10px;
+            font-size: 15px;
+            font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s;
-            margin-top: 12px;
+            transition: all 0.2s;
             text-decoration: none;
             display: inline-block;
             text-align: center;
+            margin-top: 8px;
         }
 
         .btn-back:hover {
-            background: white;
-            border-color: var(--primary);
-            color: var(--primary);
-            transform: translateY(-2px);
+            background: var(--zoom-border);
         }
 
         .loading-spinner {
             display: inline-block;
-            width: 22px;
-            height: 22px;
-            border: 3px solid rgba(255, 255, 255, 0.3);
+            width: 18px;
+            height: 18px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
             border-top-color: white;
             border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-            margin-right: 12px;
+            animation: spin 0.6s linear infinite;
+            margin-right: 8px;
             vertical-align: middle;
         }
 
@@ -397,192 +349,214 @@
             to { transform: rotate(360deg); }
         }
 
-        /* ================= INFO BOX ================= */
-        .info-box {
-            background: linear-gradient(135deg, #bee3f8 0%, #90cdf4 100%);
-            border: 2px solid #4299e1;
-            border-radius: 14px;
-            padding: 18px 20px;
-            margin-bottom: 25px;
-            color: #2c5282;
-        }
-
-        .info-box strong {
-            display: block;
-            margin-bottom: 8px;
-            font-size: 1rem;
-        }
-
-        .info-box ul {
-            margin: 0;
-            padding-left: 20px;
-        }
-
-        .info-box li {
-            margin: 6px 0;
-            font-size: 0.9rem;
-            line-height: 1.5;
-        }
-
         /* ================= RESPONSIVE ================= */
-        @media (max-width: 600px) {
-            .reset-container {
+        @media (max-width: 768px) {
+            .reset-wrapper {
+                padding: 15px;
+            }
+
+            .reset-card {
                 max-width: 100%;
             }
 
             .reset-header {
-                padding: 40px 30px 35px;
+                padding: 36px 28px 24px;
             }
 
             .reset-body {
-                padding: 40px 30px 30px;
+                padding: 0 28px 32px;
+            }
+
+            .reset-icon {
+                width: 70px;
+                height: 70px;
+                font-size: 2.5rem;
+            }
+
+            .reset-title {
+                font-size: 24px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .reset-header {
+                padding: 32px 24px 20px;
+            }
+
+            .reset-body {
+                padding: 0 24px 28px;
+            }
+
+            .reset-title {
+                font-size: 22px;
+            }
+
+            .form-input {
+                padding: 12px 14px;
+                font-size: 14px;
+            }
+        }
+
+        @media (max-height: 600px) and (orientation: landscape) {
+            .reset-wrapper {
+                padding: 10px;
+            }
+
+            .reset-header {
+                padding: 24px 32px 16px;
+            }
+
+            .reset-icon {
+                width: 60px;
+                height: 60px;
+                font-size: 2rem;
+                margin-bottom: 16px;
+            }
+
+            .reset-title {
+                font-size: 20px;
+            }
+
+            .reset-body {
+                padding: 0 32px 24px;
+            }
+
+            .form-group {
+                margin-bottom: 16px;
+            }
+
+            .info-box {
+                padding: 12px;
+                margin-bottom: 16px;
             }
         }
     </style>
 </head>
 <body>
-    <!-- Animated Background Circles -->
-    <div class="bg-circle"></div>
-    <div class="bg-circle"></div>
-    <div class="bg-circle"></div>
-
-    <!-- Reset Container -->
-    <div class="reset-container">
-        <!-- Header -->
-        <div class="reset-header">
-            <div class="reset-logo">🔑</div>
-            <div class="reset-title">Reset Password</div>
-            <div class="reset-subtitle">Create a new strong password</div>
-        </div>
-
-        <!-- Body -->
-        <div class="reset-body">
-            <!-- Alert Messages -->
-            <div id="alertError" class="alert alert-error"></div>
-            <div id="alertSuccess" class="alert alert-success"></div>
-
-            <!-- Info Box -->
-            <div class="info-box">
-                <strong>🔒 Password Requirements:</strong>
-                <ul>
-                    <li>Minimum 6 characters long</li>
-                    <li>Mix of uppercase & lowercase letters</li>
-                    <li>Include numbers and special characters</li>
-                </ul>
+    <div class="reset-wrapper">
+        <div class="reset-card">
+            <div class="reset-header">
+                <div class="reset-icon">🔑</div>
+                <h1 class="reset-title">Reset Password</h1>
+                <p class="reset-subtitle">Create a strong new password</p>
             </div>
 
-            <!-- Reset Form -->
-            <form id="resetPasswordForm">
-                @csrf
-                <input type="hidden" name="token" value="{{ $token }}">
-                <input type="hidden" name="email" value="{{ $email }}">
-                
-                <div class="form-group">
-                    <label class="form-label">📧 Email Address</label>
-                    <div class="input-wrapper">
-                        <span class="input-icon">✉️</span>
+            <div class="reset-body">
+                <div id="alertError" class="alert alert-error"></div>
+                <div id="alertSuccess" class="alert alert-success"></div>
+
+                <div class="info-box">
+                    <strong>🔒 Password Requirements:</strong>
+                    <ul>
+                        <li>Minimum 6 characters</li>
+                        <li>Mix of letters and numbers recommended</li>
+                        <li>Avoid common passwords</li>
+                    </ul>
+                </div>
+
+                <form id="resetPasswordForm">
+                    @csrf
+                    <input type="hidden" name="token" value="{{ $token }}">
+                    <input type="hidden" name="email" value="{{ $email }}">
+                    
+                    <div class="form-group">
+                        <label class="form-label">Email</label>
                         <input 
                             type="email" 
                             class="form-input" 
                             value="{{ $email }}"
                             readonly
-                            style="background: #edf2f7; cursor: not-allowed;"
                         >
                     </div>
-                </div>
 
-                <div class="form-group">
-                    <label class="form-label">🔒 New Password</label>
-                    <div class="input-wrapper">
-                        <span class="input-icon">🔐</span>
-                        <input 
-                            type="password" 
-                            name="password" 
-                            id="password" 
-                            class="form-input" 
-                            placeholder="Enter new password"
-                            required
-                            minlength="6"
-                        >
-                        <button type="button" class="password-toggle" id="togglePassword">
-                            <span id="eyeIcon1">👁️</span>
-                        </button>
-                    </div>
-                    <div class="password-strength" id="passwordStrength">
-                        <div class="strength-bar">
-                            <div class="strength-fill"></div>
+                    <div class="form-group">
+                        <label class="form-label">New Password</label>
+                        <div class="input-wrapper">
+                            <input 
+                                type="password" 
+                                name="password" 
+                                id="password" 
+                                class="form-input" 
+                                placeholder="Enter new password"
+                                required
+                                minlength="6"
+                            >
+                            <button type="button" class="password-toggle" id="togglePassword">
+                                <span id="eyeIcon1">👁️</span>
+                            </button>
                         </div>
-                        <div class="strength-text"></div>
+                        <div class="password-strength" id="passwordStrength">
+                            <div class="strength-bar">
+                                <div class="strength-fill"></div>
+                            </div>
+                            <div class="strength-text"></div>
+                        </div>
                     </div>
-                </div>
 
-                <div class="form-group">
-                    <label class="form-label">🔒 Confirm Password</label>
-                    <div class="input-wrapper">
-                        <span class="input-icon">🔐</span>
-                        <input 
-                            type="password" 
-                            name="password_confirmation" 
-                            id="passwordConfirmation" 
-                            class="form-input" 
-                            placeholder="Confirm new password"
-                            required
-                            minlength="6"
-                        >
-                        <button type="button" class="password-toggle" id="togglePasswordConfirm">
-                            <span id="eyeIcon2">👁️</span>
-                        </button>
+                    <div class="form-group">
+                        <label class="form-label">Confirm Password</label>
+                        <div class="input-wrapper">
+                            <input 
+                                type="password" 
+                                name="password_confirmation" 
+                                id="passwordConfirmation" 
+                                class="form-input" 
+                                placeholder="Confirm new password"
+                                required
+                                minlength="6"
+                            >
+                            <button type="button" class="password-toggle" id="togglePasswordConfirm">
+                                <span id="eyeIcon2">👁️</span>
+                            </button>
+                        </div>
                     </div>
-                </div>
 
-                <button type="submit" id="btnReset" class="btn-reset">
-                    <span id="btnText">RESET PASSWORD</span>
-                </button>
+                    <button type="submit" id="btnReset" class="btn-reset">
+                        <span id="btnText">Reset Password</span>
+                    </button>
 
-                <a href="{{ route('login') }}" class="btn-back">
-                    ← Back to Login
-                </a>
-            </form>
+                    <a href="{{ route('login') }}" class="btn-back">
+                        ← Back to Sign In
+                    </a>
+                </form>
+            </div>
         </div>
     </div>
 
     <script>
         $(function() {
-            // ================= CSRF TOKEN SETUP =================
             $.ajaxSetup({
                 headers: {
                     'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
                 }
             });
 
-            // ================= PASSWORD TOGGLE =================
             $('#togglePassword').click(function() {
-                const passwordInput = $('#password');
-                const eyeIcon = $('#eyeIcon1');
+                const input = $('#password');
+                const icon = $('#eyeIcon1');
                 
-                if (passwordInput.attr('type') === 'password') {
-                    passwordInput.attr('type', 'text');
-                    eyeIcon.text('🙈');
+                if (input.attr('type') === 'password') {
+                    input.attr('type', 'text');
+                    icon.text('🙈');
                 } else {
-                    passwordInput.attr('type', 'password');
-                    eyeIcon.text('👁️');
+                    input.attr('type', 'password');
+                    icon.text('👁️');
                 }
             });
 
             $('#togglePasswordConfirm').click(function() {
-                const passwordInput = $('#passwordConfirmation');
-                const eyeIcon = $('#eyeIcon2');
+                const input = $('#passwordConfirmation');
+                const icon = $('#eyeIcon2');
                 
-                if (passwordInput.attr('type') === 'password') {
-                    passwordInput.attr('type', 'text');
-                    eyeIcon.text('🙈');
+                if (input.attr('type') === 'password') {
+                    input.attr('type', 'text');
+                    icon.text('🙈');
                 } else {
-                    passwordInput.attr('type', 'password');
-                    eyeIcon.text('👁️');
+                    input.attr('type', 'password');
+                    icon.text('👁️');
                 }
             });
 
-            // ================= PASSWORD STRENGTH CHECKER =================
             $('#password').on('input', function() {
                 const password = $(this).val();
                 const strengthDiv = $('#passwordStrength');
@@ -597,64 +571,43 @@
 
                 let strength = 0;
                 
-                // Length check
                 if (password.length >= 6) strength++;
                 if (password.length >= 10) strength++;
-                
-                // Uppercase check
                 if (/[A-Z]/.test(password)) strength++;
-                
-                // Lowercase check
                 if (/[a-z]/.test(password)) strength++;
-                
-                // Number check
                 if (/[0-9]/.test(password)) strength++;
-                
-                // Special character check
                 if (/[^A-Za-z0-9]/.test(password)) strength++;
 
                 if (strength <= 2) {
                     strengthDiv.addClass('strength-weak');
-                    strengthDiv.find('.strength-text').text('Weak Password');
+                    strengthDiv.find('.strength-text').text('Weak');
                 } else if (strength <= 4) {
                     strengthDiv.addClass('strength-medium');
-                    strengthDiv.find('.strength-text').text('Medium Password');
+                    strengthDiv.find('.strength-text').text('Medium');
                 } else {
                     strengthDiv.addClass('strength-strong');
-                    strengthDiv.find('.strength-text').text('Strong Password');
+                    strengthDiv.find('.strength-text').text('Strong');
                 }
             });
 
-            // ================= FORM SUBMIT =================
             $('#resetPasswordForm').submit(function(e) {
                 e.preventDefault();
 
                 const password = $('#password').val();
                 const passwordConfirm = $('#passwordConfirmation').val();
 
-                // Validate passwords match
                 if (password !== passwordConfirm) {
                     $('#alertError').text('Passwords do not match!').fadeIn();
-                    
-                    // Shake animation
-                    $('.reset-container').css('animation', 'shake 0.5s');
-                    setTimeout(function() {
-                        $('.reset-container').css('animation', '');
-                    }, 500);
                     return;
                 }
 
                 const btn = $('#btnReset');
                 const btnText = $('#btnText');
 
-                // Disable button and show loading
                 btn.prop('disabled', true);
-                btnText.html('<span class="loading-spinner"></span>Resetting password...');
-
-                // Hide alerts
+                btnText.html('<span class="loading-spinner"></span>Resetting...');
                 $('.alert').hide();
 
-                // Get form data
                 const formData = {
                     token: $('input[name="token"]').val(),
                     email: $('input[name="email"]').val(),
@@ -662,68 +615,34 @@
                     password_confirmation: passwordConfirm
                 };
 
-                // Submit reset
                 $.ajax({
                     url: '{{ route("password.update") }}',
                     type: 'POST',
                     data: formData,
                     success: function(response) {
                         if (response.success) {
-                            // Show success message
-                            $('#alertSuccess').html(
-                                '<strong>✅ Success!</strong><br>' + response.message
-                            ).fadeIn();
-                            
-                            // Change button text
-                            btnText.html('✅ Success! Redirecting...');
+                            $('#alertSuccess').text(response.message).fadeIn();
+                            btnText.html('✓ Success! Redirecting...');
 
-                            // Redirect after 2 seconds
                             setTimeout(function() {
                                 window.location.href = response.redirect;
                             }, 2000);
                         }
                     },
                     error: function(xhr) {
-                        // Re-enable button
                         btn.prop('disabled', false);
-                        btnText.html('RESET PASSWORD');
+                        btnText.html('Reset Password');
 
-                        // Show error message
-                        let errorMsg = 'Failed to reset password. Please try again.';
+                        let errorMsg = 'Failed to reset password.';
                         if (xhr.responseJSON && xhr.responseJSON.message) {
                             errorMsg = xhr.responseJSON.message;
                         }
-                        $('#alertError').html('<strong>❌ Error</strong><br>' + errorMsg).fadeIn();
-                        
-                        // Shake animation
-                        $('.reset-container').css('animation', 'shake 0.5s');
-                        setTimeout(function() {
-                            $('.reset-container').css('animation', '');
-                        }, 500);
+                        $('#alertError').text(errorMsg).fadeIn();
                     }
                 });
             });
 
-            // ================= ENTER KEY TO SUBMIT =================
-            $('#password, #passwordConfirmation').keypress(function(e) {
-                if (e.which === 13) {
-                    $('#resetPasswordForm').submit();
-                }
-            });
-
-            // ================= AUTO-FOCUS =================
             $('#password').focus();
-
-            // ================= SHAKE ANIMATION =================
-            const style = document.createElement('style');
-            style.textContent = `
-                @keyframes shake {
-                    0%, 100% { transform: translateX(0); }
-                    10%, 30%, 50%, 70%, 90% { transform: translateX(-10px); }
-                    20%, 40%, 60%, 80% { transform: translateX(10px); }
-                }
-            `;
-            document.head.appendChild(style);
         });
     </script>
 </body>

@@ -24,6 +24,10 @@
     --toggle-bg: #cbd5e1;
     --toggle-active: #10b981;
     --toggle-knob: #ffffff;
+     --card-bg:      #ffffff;
+    --bg-color:     #f8fafc;
+    --error-color:  #ef4444;
+    --text-4:       #94a3b8;
 }
 
 /* Dark Theme Colors */
@@ -51,6 +55,10 @@
     --toggle-bg: #475569;
     --toggle-active: #34d399;
     --toggle-knob: #ffffff;
+    --card-bg:      #1e293b;
+    --bg-color:     #0f172a;
+    --error-color:  #f87171;
+    --text-4:       #64748b;
 }
 
 /* ================= BASE STYLES ================= */
@@ -781,6 +789,18 @@ input:checked + .toggle-slider:after {
     text-decoration: underline;
     transition: color 0.2s ease;
 }
+.pax-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: .25rem;
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    padding: 3px 10px;
+    font-size: .75rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
 
 .undo-link:hover {
     color: var(--primary-hover);
@@ -858,12 +878,6 @@ input:checked + .toggle-slider:after {
 }
 
 /* ================= Enhanced Receipt Styles ================= */
-.receipt-container {
-    background: var(--bg-color);
-    padding: 2rem;
-    border-radius: 12px;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
 
 .receipt-header {
     text-align: center;
@@ -917,6 +931,44 @@ input:checked + .toggle-slider:after {
         box-shadow: none !important;
         page-break-inside: avoid;
     }
+}
+/* ── Traveler Blocks — Dark/Light theme safe ── */
+.et-block {
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 1rem;
+    margin-bottom: 1rem;
+    background: var(--card-bg, var(--bg-secondary));
+}
+
+.et-block-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.75rem;
+}
+
+.et-block-title {
+    font-weight: 700;
+    color: var(--text-primary);
+    font-size: 0.9rem;
+}
+
+.et-remove-btn {
+    background: transparent;
+    border: 1px solid var(--error-color, #e53e3e);
+    color: var(--error-color, #e53e3e);
+    border-radius: 6px;
+    padding: 0.25rem 0.65rem;
+    cursor: pointer;
+    font-size: 0.8rem;
+    font-weight: 600;
+    transition: background 0.15s, color 0.15s;
+}
+
+.et-remove-btn:hover {
+    background: var(--error-color, #e53e3e);
+    color: #fff;
 }
 
 /* ================= Dark Mode Enhancements ================= */

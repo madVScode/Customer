@@ -2,23 +2,38 @@
 
 namespace App\Models;
 
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use App\Models\Notification;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Storage;
 
 class User extends Authenticatable
 {
     use HasFactory, Notifiable;
 
+    // ─── ROLE CONSTANTS ─────────────────────────────────────────────────────
+    const ROLE_TESTER         = 'tester';          // ID 0 — demo mode, no DB writes
+    const ROLE_ADMIN_SYSTEM   = 'admin_system';    // ID 1 — full access
+    const ROLE_OWNER_BUSINESS = 'owner_business';  // ID 2 — limited business access
+    const ROLE_TOURIST        = 'tourist';         // ID 3 — tourist portal only
+
+    // ─── FILLABLE ────────────────────────────────────────────────────────────
     protected $fillable = [
+        'unique_id',
         'name',
         'email',
+        'google_id',
+        'facebook_id',
         'password',
         'role',
         'is_online',
         'last_seen',
+        'last_seen_at',
         'avatar',
+        'company_id',   // untuk tourist — company yang dipilih
+        'phone',        // untuk tourist — no telefon
     ];
 
     protected $hidden = [
@@ -28,128 +43,141 @@ class User extends Authenticatable
 
     protected $casts = [
         'email_verified_at' => 'datetime',
-        'last_seen' => 'datetime',
-        'is_online' => 'boolean',
-        // 'password' => 'hashed', // aktifkan jika Laravel 10+
+        'password'          => 'hashed',
+        'last_seen_at'      => 'datetime',
+        'is_online'         => 'boolean',
     ];
 
-    /* ===================== RELATIONSHIPS ===================== */
-
-    public function notifications()
+    // ─── BOOT ────────────────────────────────────────────────────────────────
+    protected static function boot()
     {
-        return $this->hasMany(Notification::class);
+        parent::boot();
+        static::creating(function ($user) {
+            if (empty($user->unique_id)) {
+                $user->unique_id = Str::uuid();
+            }
+        });
     }
 
-    public function triggeredNotifications()
+    // ─── ROLE HELPERS ────────────────────────────────────────────────────────
+
+    public function isTester(): bool
     {
-        return $this->hasMany(Notification::class, 'triggered_by');
+        return $this->role === self::ROLE_TESTER;
     }
 
-    /* ===================== ROLE CHECKS ===================== */
-
-    public function isAdminManage(): bool
+    public function isAdminSystem(): bool
     {
-        return $this->role === 'admin_manage';
+        return $this->role === self::ROLE_ADMIN_SYSTEM;
     }
 
-    public function isAdminRecord(): bool
+    public function isOwnerBusiness(): bool
     {
-        return $this->role === 'admin_record';
+        return $this->role === self::ROLE_OWNER_BUSINESS;
+    }
+
+    public function isTourist(): bool
+    {
+        return $this->role === self::ROLE_TOURIST;
+    }
+
+    public function canAccessAdmin(): bool
+    {
+        return in_array($this->role, [
+            self::ROLE_TESTER,
+            self::ROLE_ADMIN_SYSTEM,
+            self::ROLE_OWNER_BUSINESS,
+        ]);
     }
 
     public function getRoleNameAttribute(): string
     {
         return match ($this->role) {
-            'admin_manage' => 'Admin Manage Data',
-            'admin_record' => 'Admin Simpan Rekod',
-            default => 'Unknown',
+            self::ROLE_TESTER         => 'Tester (Demo)',
+            self::ROLE_ADMIN_SYSTEM   => 'Admin System',
+            self::ROLE_OWNER_BUSINESS => 'Owner Business',
+            self::ROLE_TOURIST        => 'Tourist',
+            default                   => ucfirst($this->role),
         };
     }
-
-    /* ===================== ONLINE STATUS ===================== */
-
-    public function updateOnlineStatus(bool $isOnline = true): bool
-    {
-        return $this->update([
-            'is_online' => $isOnline,
-            'last_seen' => now(),
-        ]);
-    }
-
-    public function isRecentlyActive(): bool
-    {
-        return $this->last_seen
-            ? $this->last_seen->diffInMinutes(now()) <= 5
-            : false;
-    }
-
-    public function getOnlineStatusAttribute(): string
-    {
-        if ($this->is_online && $this->isRecentlyActive()) {
-            return 'online';
-        }
-
-        if ($this->last_seen && $this->last_seen->diffInMinutes(now()) <= 30) {
-            return 'away';
-        }
-
-        return 'offline';
-    }
-
-    public function getStatusColorAttribute(): string
-    {
-        return match ($this->online_status) {
-            'online' => '#4caf50',
-            'away' => '#ff9800',
-            'offline' => '#9e9e9e',
-            default => '#9e9e9e',
-        };
-    }
-
-    public function getStatusIconAttribute(): string
-    {
-        return match ($this->online_status) {
-            'online' => '🟢',
-            'away' => '🟡',
-            'offline' => '⚫',
-            default => '⚫',
-        };
-    }
-
-    /* ===================== NOTIFICATIONS ===================== */
-
-    public function unreadNotificationsCount(): int
-    {
-        return $this->notifications()
-            ->where('is_read', false)
-            ->count();
-    }
-
-    /* ===================== AVATAR ===================== */
 
     public function getAvatarUrlAttribute(): string
     {
-        return $this->avatar
-            ? asset('storage/' . $this->avatar)
-            : 'https://ui-avatars.com/api/?name='
-                . urlencode($this->name)
-                . '&color=ffffff&background=4a90e2&size=128';
+        // Kalau ada avatar tersimpan dalam storage
+        if ($this->avatar && Storage::disk('public')->exists($this->avatar)) {
+            return asset('storage/' . $this->avatar);
+        }
+
+        // Default: SVG avatar dengan inisial nama
+        $initials = strtoupper(substr($this->name ?? '?', 0, 1));
+        $svg = '<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100">'
+             . '<rect width="100" height="100" rx="50" fill="#667eea"/>'
+             . '<text x="50" y="65" text-anchor="middle" font-family="Arial,sans-serif" '
+             . 'font-size="45" font-weight="bold" fill="white">' . $initials . '</text>'
+             . '</svg>';
+
+        return 'data:image/svg+xml;base64,' . base64_encode($svg);
     }
 
-    /* ===================== SCOPES ===================== */
-
-    public function scopeOnline($query)
+    public function getRoleColorAttribute(): string
     {
-        return $query->where('is_online', true);
+        return match ($this->role) {
+            self::ROLE_TESTER         => '#ff9800',
+            self::ROLE_ADMIN_SYSTEM   => '#9c27b0',
+            self::ROLE_OWNER_BUSINESS => '#2196f3',
+            self::ROLE_TOURIST        => '#4caf50',
+            default                   => '#666',
+        };
     }
 
-    public function scopeAdminManage($query)
+    public function getPermissionsAttribute(): array
     {
-        return $query->where('role', 'admin_manage');
+        return match ($this->role) {
+            self::ROLE_TESTER, self::ROLE_ADMIN_SYSTEM => [
+                'companies', 'customers', 'trips', 'bookings', 'receipts',
+                'settings', 'users', 'reports',
+            ],
+            self::ROLE_OWNER_BUSINESS => [
+                'companies', 'customers', 'trips', 'bookings', 'receipts', 'settings',
+            ],
+            self::ROLE_TOURIST => [
+                'tourist_trips', 'tourist_bookings',
+            ],
+            default => [],
+        };
     }
 
-    public function scopeAdminRecord($query)
+    public function can_do(string $permission): bool
     {
-        return $query->where('role', 'admin_record');
+        return in_array($permission, $this->permissions);
+    }
+
+    // ─── ONLINE STATUS HELPERS ───────────────────────────────────────────────
+
+    /**
+     * Update online status
+     *
+     * @param bool $isOnline
+     */
+    public function updateOnlineStatus(bool $isOnline = true): void
+    {
+        $this->is_online = $isOnline;
+        $this->last_seen_at = now();
+        $this->save();
+    }
+
+    /**
+     * Check if user is online
+     */
+    public function isOnline(): bool
+    {
+        return $this->is_online;
+    }
+
+    // ─── RELATIONSHIPS ───────────────────────────────────────────────────────
+
+    public function company()
+    {
+        return $this->belongsTo(\App\Models\Company::class, 'company_id');
     }
 }
